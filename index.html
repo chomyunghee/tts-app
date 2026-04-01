@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TTS 스튜디오 — ElevenLabs</title>
+<title>TTS 스튜디오</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -13,7 +13,7 @@
     --green: #166534; --green-bg: #dcfce7;
     --red: #991b1b; --red-bg: #fee2e2;
     --blue: #1e40af; --blue-bg: #dbeafe;
-    --yellow-text: #92400e;
+    --amber: #92400e; --amber-bg: #fef3c7;
     --r: 10px; --rs: 7px;
   }
   @media (prefers-color-scheme: dark) {
@@ -24,249 +24,210 @@
       --green: #86efac; --green-bg: #14532d33;
       --red: #fca5a5; --red-bg: #7f1d1d33;
       --blue: #93c5fd; --blue-bg: #1e3a5f33;
-      --yellow-text: #fcd34d;
+      --amber: #fcd34d; --amber-bg: #78350f33;
     }
   }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 2rem 1rem 3rem; }
   .app { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-
   header { text-align: center; }
   header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
   header p { font-size: 13px; color: var(--text2); margin-top: 5px; }
   .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
-  .tag-el { background: var(--blue-bg); color: var(--blue); }
   .tag-free { background: var(--green-bg); color: var(--green); }
 
   .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--r); padding: 1.1rem 1.25rem; }
   .card-title { font-size: 10.5px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 12px; }
 
-  .api-row { display: flex; gap: 8px; }
-  .api-input { flex: 1; padding: 8px 12px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text); font-size: 13px; outline: none; font-family: monospace; transition: border-color 0.15s; }
-  .api-input:focus { border-color: var(--text); }
-  .api-status { font-size: 12px; color: var(--text3); margin-top: 7px; min-height: 18px; }
-  .api-status.ok { color: var(--green); } .api-status.err { color: var(--red); }
-  .quota { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
-  .quota span { font-size: 12px; color: var(--text2); } .quota strong { color: var(--text); }
+  textarea { width: 100%; min-height: 130px; resize: vertical; font-size: 15px; line-height: 1.65; color: var(--text); background: transparent; border: none; outline: none; font-family: inherit; }
+  .char-count { font-size: 12px; color: var(--text3); text-align: right; margin-top: 4px; }
 
   .voice-panel { display: flex; flex-direction: column; gap: 10px; }
-  .search-inp { width: 100%; padding: 8px 12px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text); font-size: 13px; outline: none; font-family: inherit; }
+  .search-inp { width: 100%; padding: 8px 12px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text); font-size: 13px; outline: none; font-family: inherit; transition: border-color 0.15s; }
   .search-inp:focus { border-color: var(--text); }
 
   .ftabs { display: flex; gap: 6px; flex-wrap: wrap; }
-  .ftab { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 99px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
-  .ftab:hover { background: var(--bg2); } .ftab.active { background: var(--text); color: var(--bg); border-color: transparent; } .ftab:disabled { opacity: 0.3; cursor: not-allowed; }
+  .ftab { display: flex; align-items: center; gap: 4px; padding: 5px 11px; border-radius: 99px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .ftab:hover { background: var(--bg2); }
+  .ftab.active { background: var(--text); color: var(--bg); border-color: transparent; }
+  .ftab:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .vlist { max-height: 250px; overflow-y: auto; border: 0.5px solid var(--border); border-radius: var(--rs); }
   .vitem { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; border-bottom: 0.5px solid var(--border); transition: background 0.1s; }
-  .vitem:last-child { border-bottom: none; } .vitem:hover { background: var(--bg2); } .vitem.sel { background: var(--bg2); } .vitem.sel .vname { font-weight: 600; }
-  .vavatar { width: 34px; height: 34px; border-radius: 50%; background: var(--bg2); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .vitem:last-child { border-bottom: none; }
+  .vitem:hover { background: var(--bg2); }
+  .vitem.sel { background: var(--bg2); }
+  .vitem.sel .vname { font-weight: 600; }
+  .vavatar { width: 32px; height: 32px; border-radius: 50%; background: var(--bg2); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
   .vinfo { flex: 1; min-width: 0; }
   .vname { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vmeta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
-  .pill { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--bg2); border: 0.5px solid var(--border); color: var(--text2); white-space: nowrap; }
-  .pill-f { background: var(--red-bg); border-color: transparent; color: var(--red); }
-  .pill-m { background: var(--blue-bg); border-color: transparent; color: var(--blue); }
-  .pill-age { background: var(--green-bg); border-color: transparent; color: var(--green); }
+  .pill { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--bg2); border: 0.5px solid var(--border); color: var(--text2); }
+  .pill-local { background: var(--green-bg); border-color: transparent; color: var(--green); }
+  .pill-net { background: var(--blue-bg); border-color: transparent; color: var(--blue); }
+  .pill-fav { background: var(--amber-bg); border-color: transparent; color: var(--amber); }
+  .vstar { padding: 4px 7px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: transparent; cursor: pointer; font-size: 14px; flex-shrink: 0; transition: all 0.15s; }
+  .vstar:hover { background: var(--bg2); }
   .vprev { padding: 4px 9px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: inherit; flex-shrink: 0; transition: all 0.15s; }
   .vprev:hover { background: var(--bg2); color: var(--text); }
   .vcount { font-size: 11px; color: var(--text3); text-align: right; }
-  .empty { text-align: center; padding: 2.5rem 1rem; font-size: 13px; color: var(--text3); line-height: 1.7; }
-
-  textarea { width: 100%; min-height: 120px; resize: vertical; font-size: 15px; line-height: 1.65; color: var(--text); background: transparent; border: none; outline: none; font-family: inherit; }
-  .char-ct { font-size: 12px; color: var(--text3); text-align: right; margin-top: 4px; }
-  .char-ct.warn { color: var(--yellow-text); }
 
   .ctrl-col { display: flex; flex-direction: column; gap: 12px; }
   .ctrl-row { display: flex; align-items: center; gap: 12px; }
-  .ctrl-row label { font-size: 13px; color: var(--text2); min-width: 56px; }
+  .ctrl-row label { font-size: 13px; color: var(--text2); min-width: 40px; }
   .ctrl-row input[type=range] { flex: 1; accent-color: var(--text); }
   .ctrl-val { font-size: 13px; font-weight: 600; min-width: 40px; text-align: right; }
-  .ctrl-hint { font-size: 11px; color: var(--text3); margin-top: -6px; margin-left: 68px; line-height: 1.5; }
 
   .btn-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: transparent; color: var(--text); font-size: 13.5px; cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
-  .btn:hover { background: var(--bg2); } .btn:active { transform: scale(0.97); } .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-  .btn-p { background: var(--text); color: var(--bg); border-color: transparent; font-weight: 600; } .btn-p:hover { opacity: 0.88; background: var(--text); }
-  .btn-s { border-color: var(--red); color: var(--red); } .btn-s:hover { background: var(--red-bg); }
+  .btn:hover { background: var(--bg2); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .btn-p { background: var(--text); color: var(--bg); border-color: transparent; font-weight: 600; }
+  .btn-p:hover { opacity: 0.88; background: var(--text); }
+  .btn-s { border-color: var(--red); color: var(--red); }
+  .btn-s:hover { background: var(--red-bg); }
 
   .waveform { display: flex; align-items: center; gap: 3px; height: 32px; margin: 0 6px; }
   .bar { width: 3px; border-radius: 2px; background: var(--text3); height: 4px; }
   .bar.on { background: var(--text); animation: wv .85s ease-in-out infinite; }
   @keyframes wv { 0%,100%{height:4px}50%{height:20px} }
   .bar:nth-child(2).on{animation-delay:.13s}.bar:nth-child(3).on{animation-delay:.26s}.bar:nth-child(4).on{animation-delay:.09s}.bar:nth-child(5).on{animation-delay:.32s}
-  .status { font-size: 12px; margin-left: auto; color: var(--text3); }
-  .status.playing { color: var(--green); } .status.loading { color: var(--blue); } .status.err { color: var(--red); }
-  .prog-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 10px; }
-  .prog-fill { height: 100%; background: var(--text); width: 0%; border-radius: 2px; transition: width 0.4s; }
 
-  .spin { display: inline-block; width: 13px; height: 13px; border: 2px solid var(--border2); border-top-color: var(--text); border-radius: 50%; animation: sp .7s linear infinite; margin-right: 5px; vertical-align: middle; }
-  @keyframes sp { to { transform: rotate(360deg); } }
+  .status { font-size: 12px; color: var(--text3); margin-left: auto; }
+  .status.playing { color: var(--green); }
+  .prog-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .prog-fill { height: 100%; background: var(--text); width: 0%; border-radius: 2px; transition: width 0.3s; }
+  .dl-note { font-size: 11px; color: var(--text3); margin-top: 8px; line-height: 1.6; }
+  .empty { text-align: center; padding: 2.5rem; font-size: 13px; color: var(--text3); line-height: 1.7; }
   footer { text-align: center; font-size: 12px; color: var(--text3); padding-top: 4px; }
-  .hidden { display: none !important; }
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <h1>TTS 스튜디오 <span class="tag tag-el">ElevenLabs</span> <span class="tag tag-free">무료 티어</span></h1>
-    <p>고품질 AI 음성 · 한국어 완벽 지원 · 월 10,000자 무료</p>
+    <h1>TTS 스튜디오 <span class="tag tag-free">완전 무료</span></h1>
+    <p>API 키 없이 바로 사용 · 다국어 지원 · 브라우저 내장 엔진</p>
   </header>
 
   <div class="card">
-    <div class="card-title">ElevenLabs API 키</div>
-    <div class="api-row">
-      <input class="api-input" type="password" id="apiKey" placeholder="API 키를 붙여넣으세요 (elevenlabs.io → Profile → API Key)">
-      <button class="btn btn-p" onclick="connect()">연결</button>
-      <button class="btn" id="delKeyBtn" onclick="deleteKey()" style="display:none;border-color:var(--red);color:var(--red);">키 삭제</button>
-    </div>
-    <div class="api-status" id="apiStatus">elevenlabs.io → 로그인 → 우측 상단 프로필 → API Key</div>
-    <div class="quota hidden" id="quotaBox"></div>
+    <div class="card-title">텍스트 입력</div>
+    <textarea id="txt" placeholder="여기에 텍스트를 입력하세요..."></textarea>
+    <div class="char-count"><span id="charCt">0</span>자</div>
   </div>
 
-  <div class="card hidden" id="voiceCard">
+  <div class="card">
     <div class="card-title">음성 선택</div>
     <div class="voice-panel">
-      <input type="text" class="search-inp" id="vsearch" placeholder="이름·성별·나이·억양 검색..." oninput="filter()">
+      <input type="text" class="search-inp" id="vsearch" placeholder="이름·언어 검색..." oninput="filter()">
       <div class="ftabs" id="ftabs"></div>
-      <div class="vlist" id="vlist"><div class="empty">로딩 중...</div></div>
+      <div class="vlist" id="vlist"><div class="empty">음성 로딩 중...</div></div>
       <div class="vcount" id="vcount"></div>
     </div>
   </div>
 
-  <div class="card hidden" id="textCard">
-    <div class="card-title">텍스트 입력</div>
-    <textarea id="txt" placeholder="여기에 텍스트를 입력하세요...&#10;한국어, 영어, 일본어, 중국어 등 다국어 모두 지원합니다."></textarea>
-    <div class="char-ct" id="charCt">0 / 10,000자</div>
-  </div>
-
-  <div class="card hidden" id="ctrlCard">
+  <div class="card">
     <div class="card-title">음성 설정</div>
     <div class="ctrl-col">
-      <div class="ctrl-row"><label>안정성</label><input type="range" id="stab" min="0" max="1" step="0.05" value="0.5" oninput="v('stabV',Math.round(this.value*100)+'%')"><span class="ctrl-val" id="stabV">50%</span></div>
-      <p class="ctrl-hint">높을수록 일정한 톤 / 낮을수록 감정 표현 풍부</p>
-      <div class="ctrl-row"><label>유사도</label><input type="range" id="sim" min="0" max="1" step="0.05" value="0.75" oninput="v('simV',Math.round(this.value*100)+'%')"><span class="ctrl-val" id="simV">75%</span></div>
-      <p class="ctrl-hint">원본 음성에 얼마나 가깝게 재현할지</p>
-      <div class="ctrl-row"><label>스타일</label><input type="range" id="sty" min="0" max="1" step="0.05" value="0" oninput="v('styV',Math.round(this.value*100)+'%')"><span class="ctrl-val" id="styV">0%</span></div>
-      <p class="ctrl-hint">높을수록 개성 강조 (연산 비용 증가)</p>
+      <div class="ctrl-row"><label>속도</label><input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" oninput="v('rateV',parseFloat(this.value).toFixed(1)+'x')"><span class="ctrl-val" id="rateV">1.0x</span></div>
+      <div class="ctrl-row"><label>음조</label><input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1" oninput="v('pitchV',parseFloat(this.value).toFixed(1))"><span class="ctrl-val" id="pitchV">1.0</span></div>
+      <div class="ctrl-row"><label>음량</label><input type="range" id="vol" min="0" max="1" step="0.05" value="1" oninput="v('volV',Math.round(this.value*100)+'%')"><span class="ctrl-val" id="volV">100%</span></div>
     </div>
   </div>
 
-  <div class="card hidden" id="playCard">
+  <div class="card">
     <div class="card-title">재생 &amp; 다운로드</div>
     <div class="btn-row">
-      <button class="btn btn-p" id="playBtn" onclick="generate()">▶ 생성 &amp; 재생</button>
+      <button class="btn btn-p" id="playBtn" onclick="play()">▶ 재생</button>
+      <button class="btn" id="pauseBtn" onclick="pause()" disabled>⏸ 일시정지</button>
       <button class="btn btn-s" id="stopBtn" onclick="stop()" disabled>■ 정지</button>
       <div class="waveform"><div class="bar" id="b1"></div><div class="bar" id="b2"></div><div class="bar" id="b3"></div><div class="bar" id="b4"></div><div class="bar" id="b5"></div></div>
       <span class="status" id="st">대기 중</span>
     </div>
     <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
     <div style="margin-top:10px;">
-      <button class="btn" id="dlBtn" onclick="dl()" disabled>⬇ MP3 다운로드</button>
+      <button class="btn" onclick="download()">⬇ 음성 파일 다운로드</button>
     </div>
+    <p class="dl-note">다운로드 클릭 후 탭 오디오 공유를 허용하면 WebM 파일로 저장됩니다.</p>
   </div>
 
-  <footer>eleven_multilingual_v2 모델 · 모든 언어 지원 · API 키는 브라우저에만 저장됩니다</footer>
+  <footer>Web Speech API · 완전 무료 · 브라우저에서 직접 처리 · 외부 전송 없음</footer>
 </div>
 
 <script>
-let voices=[], filtered=[], sel=null, af='all', audio=null, lastBlob=null, key='';
-let favs=new Set(JSON.parse(localStorage.getItem('el_favs')||'[]'));
-function saveFavs(){localStorage.setItem('el_favs',JSON.stringify([...favs]));}
+const synth = window.speechSynthesis;
+let all=[], filtered=[], sel=null, af='all';
+let isPlaying=false, isPaused=false, utt=null;
+let recorder=null, chunks=[];
+let favs=new Set(JSON.parse(localStorage.getItem('tts_favs')||'[]'));
+const saveFavs=()=>localStorage.setItem('tts_favs',JSON.stringify([...favs]));
 const v=(id,t)=>document.getElementById(id).textContent=t;
-const show=id=>document.getElementById(id).classList.remove('hidden');
-const gIcon={female:'👩',male:'👨'};
-const ageKo={young:'청년',middle_aged:'중년',old:'노인'};
-const accentKo={american:'미국식',british:'영국식',australian:'호주식',irish:'아일랜드식',swedish:'스웨덴식',german:'독일식',french:'프랑스식',italian:'이탈리아식',spanish:'스페인식',indian:'인도식',african:'아프리카식'};
 
-const cats=[
-  {key:'fav',icon:'⭐',label:'즐겨찾기'},
-  {key:'all',icon:'🎙',label:'전체'},
-  {key:'female',icon:'👩',label:'여자'},
-  {key:'male',icon:'👨',label:'남자'},
-  {key:'young',icon:'🧑',label:'청년'},
-  {key:'middle_aged',icon:'🙋',label:'중년'},
-  {key:'old',icon:'👴',label:'노인'},
-];
+const langLabels={ko:'한국어',en:'영어',ja:'일본어',zh:'중국어',fr:'프랑스어',de:'독일어',es:'스페인어',it:'이탈리아어',pt:'포르투갈어',ru:'러시아어',ar:'아랍어',hi:'힌디어',nl:'네덜란드어',pl:'폴란드어',sv:'스웨덴어',tr:'터키어',th:'태국어',id:'인도네시아어',vi:'베트남어'};
+const flagMap={'ko':'🇰🇷','en-US':'🇺🇸','en-GB':'🇬🇧','en-AU':'🇦🇺','en-IN':'🇮🇳','ja':'🇯🇵','zh':'🇨🇳','zh-TW':'🇹🇼','fr':'🇫🇷','de':'🇩🇪','es':'🇪🇸','it':'🇮🇹','pt-BR':'🇧🇷','pt-PT':'🇵🇹','ru':'🇷🇺','ar':'🇸🇦','hi':'🇮🇳','nl':'🇳🇱','sv':'🇸🇪','tr':'🇹🇷'};
+const samples={ko:'안녕하세요! 반갑습니다.',en:'Hello! Nice to meet you.',ja:'こんにちは！よろしくお願いします。',zh:'你好！很高兴认识你。',fr:'Bonjour ! Ravi de vous rencontrer.',de:'Hallo! Schön, Sie kennenzulernen.',es:'¡Hola! Encantado de conocerte.',it:'Ciao! Piacere di conoscerti.',pt:'Olá! Prazer em conhecê-lo.',ru:'Привет! Приятно познакомиться.'};
 
-async function connect(){
-  key=document.getElementById('apiKey').value.trim();
-  if(!key){setSt2('API 키를 입력해주세요.','err');return;}
-  setSt2('<span class="spin"></span>연결 중...','');
-  try{
-    // 음성 목록 조회
-    let vr;
-    try{ vr=await fetch('https://api.elevenlabs.io/v1/voices',{headers:{'xi-api-key':key}}); }
-    catch(netErr){ throw new Error('네트워크 오류 — 인터넷 연결 확인 ('+netErr.message+')'); }
-    if(vr.status===401) throw new Error('API 키가 올바르지 않아요 (401)');
-    if(vr.status===403) throw new Error('접근 권한 없음 (403)');
-    if(!vr.ok) throw new Error('서버 오류 (HTTP '+vr.status+')');
-    const vd=await vr.json();
-    voices=vd.voices||[];
-    // 사용량 조회 (실패해도 계속)
-    try{
-      const ur=await fetch('https://api.elevenlabs.io/v1/user/subscription',{headers:{'xi-api-key':key}});
-      if(ur.ok){
-        const ud=await ur.json();
-        const used=ud.character_count||0,lim=ud.character_limit||10000;
-        const qb=document.getElementById('quotaBox');
-        qb.className='quota'; qb.style='display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;';
-        qb.innerHTML=`<span>사용: <strong>${used.toLocaleString()}자</strong></span><span>남은 한도: <strong>${(lim-used).toLocaleString()}자</strong></span><span>총 한도: <strong>${lim.toLocaleString()}자</strong></span>`;
-      }
-    }catch(_){}
-    setSt2('✓ 연결 성공 — 음성 '+voices.length+'개 로드됨','ok');
-    localStorage.setItem('el_api_key',key);
-    document.getElementById('delKeyBtn').style.display='';
-    ['voiceCard','textCard','ctrlCard','playCard'].forEach(show);
-    buildTabs(); filter();
-  }catch(e){setSt2('✗ '+e.message,'err');}
+const femaleNames=new Set(['samantha','victoria','karen','moira','fiona','ava','allison','susan','zira','helena','anna','alice','kyoko','joana','luciana','monica','paulina','veena','kanya','laura','amelie','katja','petra','tessa','nora','ellen','julie','sara','sora','yuna','heera','raveena','agnes','alva','ida','klara','eva','linh','lekha','milena','mariska','ting-ting','sin-ji','mei-jia']);
+const maleNames=new Set(['alex','daniel','fred','tom','david','mark','george','rishi','yuri','luca','diego','maged','tarik','thomas','oliver','arthur','eddy','reed','aaron','nathan','gordon','bruce','ralph','albert','jorge','felix','leon','henrik','oskar','adam']);
+
+function classify(vx){
+  const n=vx.name.toLowerCase(), l=vx.lang.toLowerCase(), c=n+' '+l;
+  if(['junior','child','kid'].some(k=>c.includes(k))) return 'child';
+  if(['senior','elder','grandma','grandpa','할머니','할아버지'].some(k=>c.includes(k))) return 'elderly';
+  if(['teen','youth'].some(k=>c.includes(k))) return 'youth';
+  const fn=n.split(/[\s\-_]/)[0];
+  if(femaleNames.has(fn)||['female','woman','girl','여성','여자','여','féminin','weiblich'].some(k=>c.includes(k))) return 'female';
+  if(maleNames.has(fn)||['male','man','boy','남성','남자','남','masculin','männlich'].some(k=>c.includes(k))) return 'male';
+  return 'unknown';
 }
 
-function deleteKey(){
-  if(!confirm('저장된 API 키를 삭제할까요?')) return;
-  localStorage.removeItem('el_api_key');
-  document.getElementById('apiKey').value='';
-  document.getElementById('delKeyBtn').style.display='none';
-  ['voiceCard','textCard','ctrlCard','playCard'].forEach(id=>document.getElementById(id).classList.add('hidden'));
-  setSt2('키가 삭제됐어요. 새 키를 입력해주세요.','');
+const getFlag=l=>flagMap[l]||flagMap[l.split('-')[0]]||'🌐';
+const getLang=l=>langLabels[l.split('-')[0]]||l;
+const getSample=l=>samples[l.split('-')[0]]||'Hello! This is a voice preview.';
+const catIcon={female:'👩',male:'👨',child:'👧',elderly:'👴',youth:'🧑',unknown:'🎙'};
+const catLabel={fav:'즐겨찾기',all:'전체',female:'여자',male:'남자',youth:'청년',elderly:'노인',child:'어린이',unknown:'기타'};
+const catOrder=['fav','all','female','male','youth','elderly','child','unknown'];
+
+function populate(){
+  all=synth.getVoices();
+  if(!all.length) return;
+  all.forEach(vx=>vx._cat=classify(vx));
+  all.sort((a,b)=>{
+    if(a.lang.startsWith('ko')&&!b.lang.startsWith('ko')) return -1;
+    if(!a.lang.startsWith('ko')&&b.lang.startsWith('ko')) return 1;
+    return a.lang.localeCompare(b.lang);
+  });
+  if(!sel) sel=all.find(vx=>vx.lang.startsWith('ko'))||all[0];
+  buildTabs(); filter();
 }
-
-window.addEventListener('DOMContentLoaded', ()=>{
-  const saved = localStorage.getItem('el_api_key');
-  if(saved){ document.getElementById('apiKey').value=saved; document.getElementById('delKeyBtn').style.display=''; setSt2('저장된 키로 자동 연결 중...',''); connect(); }
-});
-
-function setSt2(msg,cls){const el=document.getElementById('apiStatus');el.innerHTML=msg;el.className='api-status'+(cls?' '+cls:'');}
-
-function getG(vx){return(vx.labels?.gender||'').toLowerCase();}
-function getA(vx){return(vx.labels?.age||'').toLowerCase();}
+if(synth.onvoiceschanged!==undefined) synth.onvoiceschanged=populate;
+populate();
 
 function buildTabs(){
   const tabs=document.getElementById('ftabs'); tabs.innerHTML='';
-  const cnt={all:voices.length,fav:favs.size};
-  voices.forEach(vx=>{const g=getG(vx),a=getA(vx);if(g)cnt[g]=(cnt[g]||0)+1;if(a)cnt[a]=(cnt[a]||0)+1;});
-  cats.forEach(({key,icon,label})=>{
-    const n=key==='fav'?favs.size:(cnt[key]||0);
+  const cnt={all:all.length,fav:favs.size};
+  all.forEach(vx=>{const c=vx._cat;cnt[c]=(cnt[c]||0)+1;});
+  catOrder.forEach(key=>{
+    const n=cnt[key]||0;
+    if(key!=='fav'&&key!=='all'&&n===0) return;
     const btn=document.createElement('button');
     btn.id='tab_'+key;
     btn.className='ftab'+(key==='all'?' active':'');
-    btn.innerHTML=icon+' '+label+(key!=='all'?' ('+n+')':'');
-    if(key!=='all'&&key!=='fav'&&n===0)btn.disabled=true;
-    btn.onclick=()=>{if(btn.disabled)return;af=key;document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');filter();};
+    const icon=key==='fav'?'⭐':key==='all'?'🎙':(catIcon[key]||'');
+    btn.innerHTML=icon+' '+catLabel[key]+(key!=='all'?' ('+n+')':'');
+    btn.onclick=()=>{af=key;document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');filter();};
     tabs.appendChild(btn);
   });
 }
 
 function filter(){
   const q=document.getElementById('vsearch').value.toLowerCase();
-  filtered=voices.filter(vx=>{
-    const g=getG(vx),a=getA(vx);
-    const mc=af==='fav'?favs.has(vx.voice_id):af==='all'?true:(af==='female'||af==='male')?g===af:a===af;
-    const srch=[vx.name,g,a,vx.labels?.accent||'',vx.labels?.description||'',vx.labels?.use_case||'',accentKo[vx.labels?.accent]||''].join(' ').toLowerCase();
+  filtered=all.filter(vx=>{
+    const mc=af==='fav'?favs.has(vx.name):af==='all'?true:vx._cat===af;
+    const srch=[vx.name,vx.lang,getLang(vx.lang)].join(' ').toLowerCase();
     return mc&&(!q||srch.includes(q));
   });
-  // 즐겨찾기 항목은 전체 탭에서도 상단 고정
-  if(af==='all'||af==='female'||af==='male'||af==='young'||af==='middle_aged'||af==='old'){
-    filtered.sort((a,b)=>(favs.has(b.voice_id)?1:0)-(favs.has(a.voice_id)?1:0));
+  if(af==='all'||af==='female'||af==='male'){
+    filtered.sort((a,b)=>(favs.has(b.name)?1:0)-(favs.has(a.name)?1:0));
   }
   renderList();
 }
@@ -274,82 +235,82 @@ function filter(){
 function renderList(){
   const list=document.getElementById('vlist');
   document.getElementById('vcount').textContent=filtered.length+'개 음성';
-  if(!filtered.length){list.innerHTML='<div class="empty">해당 카테고리 음성이 없어요</div>';return;}
+  if(!filtered.length){list.innerHTML='<div class="empty">음성이 없어요<br><small>Windows 설정 → 시간 및 언어 → 음성에서 추가하세요</small></div>';return;}
   list.innerHTML='';
   filtered.forEach((vx,i)=>{
-    const g=getG(vx),a=getA(vx),acc=vx.labels?.accent||'',desc=vx.labels?.description||'',uc=vx.labels?.use_case||'';
-    const pills=[
-      g?`<span class="pill pill-${g[0]}">${gIcon[g]||''} ${g==='female'?'여자':'남자'}</span>`:'',
-      a?`<span class="pill pill-age">${ageKo[a]||a}</span>`:'',
-      acc?`<span class="pill">${accentKo[acc]||acc}</span>`:'',
-      desc?`<span class="pill">${desc}</span>`:'',
-      uc?`<span class="pill">${uc}</span>`:'',
-    ].filter(Boolean).slice(0,4).join('');
+    const isFav=favs.has(vx.name);
     const item=document.createElement('div');
-    item.className='vitem'+(sel&&sel.voice_id===vx.voice_id?' sel':'');
-    const isFav=favs.has(vx.voice_id);
-    item.innerHTML=`<div class="vavatar">${gIcon[g]||'🎙'}</div><div class="vinfo"><div class="vname">${vx.name}${isFav?'<span style="margin-left:5px;font-size:12px;">⭐</span>':''}</div><div class="vmeta">${pills}</div></div><button class="vstar" onclick="toggleFav(event,'${vx.voice_id}')" style="padding:4px 8px;border-radius:var(--rs,7px);border:0.5px solid var(--border);background:transparent;cursor:pointer;font-size:15px;flex-shrink:0;">${isFav?'⭐':'☆'}</button><button class="vprev" onclick="prev(event,${i})">미리듣기</button>`;
-    item.addEventListener('click',e=>{if(e.target.classList.contains('vprev'))return;pick(vx,item);});
+    item.className='vitem'+(sel&&sel.name===vx.name?' sel':'');
+    item.innerHTML=`<div class="vavatar">${getFlag(vx.lang)}</div><div class="vinfo"><div class="vname">${vx.name}${isFav?' ⭐':''}</div><div class="vmeta"><span class="pill ${vx.localService?'pill-local':'pill-net'}">${vx.localService?'오프라인':'온라인'}</span><span class="pill">${getLang(vx.lang)}</span></div></div><button class="vstar" onclick="toggleFav(event,'${vx.name}')">${isFav?'⭐':'☆'}</button><button class="vprev" onclick="prev(event,${i})">미리듣기</button>`;
+    item.addEventListener('click',e=>{if(['vstar','vprev'].some(c=>e.target.classList.contains(c)))return;sel=vx;document.querySelectorAll('.vitem').forEach(x=>x.classList.remove('sel'));item.classList.add('sel');});
     list.appendChild(item);
   });
 }
 
-function pick(vx,item){sel=vx;document.querySelectorAll('.vitem').forEach(x=>x.classList.remove('sel'));item.classList.add('sel');}
-
-function toggleFav(e,vid){
+function toggleFav(e,name){
   e.stopPropagation();
-  if(favs.has(vid))favs.delete(vid);else favs.add(vid);
+  favs.has(name)?favs.delete(name):favs.add(name);
   saveFavs();
-  // update fav tab count
   const ft=document.getElementById('tab_fav');
-  if(ft)ft.innerHTML='⭐ 즐겨찾기 ('+favs.size+')';
+  if(ft) ft.innerHTML='⭐ 즐겨찾기 ('+favs.size+')';
   filter();
 }
 
 function prev(e,i){
   e.stopPropagation();
   const vx=filtered[i];
-  pick(vx,e.target.closest('.vitem'));
-  if(vx.preview_url){stop();audio=new Audio(vx.preview_url);audio.play();wave(true);audio.onended=()=>wave(false);}
+  synth.cancel(); isPlaying=false; isPaused=false; wave(false); updateBtns();
+  const u=new SpeechSynthesisUtterance(getSample(vx.lang));
+  u.voice=vx; u.rate=1; u.pitch=1; u.volume=1; synth.speak(u);
+  sel=vx;
+  document.querySelectorAll('.vitem').forEach(x=>x.classList.remove('sel'));
+  e.target.closest('.vitem').classList.add('sel');
 }
 
-document.getElementById('txt').addEventListener('input',function(){
-  const n=this.value.length;
-  const el=document.getElementById('charCt');
-  el.textContent=n.toLocaleString()+' / 10,000자';
-  el.className='char-ct'+(n>9000?' warn':'');
-});
+document.getElementById('txt').addEventListener('input',function(){v('charCt',this.value.length);});
 
-async function generate(){
+function play(){
   const txt=document.getElementById('txt').value.trim();
   if(!txt){alert('텍스트를 입력해주세요.');return;}
-  if(!sel){alert('음성을 선택해주세요.');return;}
-  setSt('생성 중...','loading'); wave(false);
-  document.getElementById('playBtn').disabled=true;
-  setP(30);
-  try{
-    const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${sel.voice_id}`,{
-      method:'POST',
-      headers:{'xi-api-key':key,'Content-Type':'application/json','Accept':'audio/mpeg'},
-      body:JSON.stringify({
-        text:txt,model_id:'eleven_multilingual_v2',
-        voice_settings:{stability:+document.getElementById('stab').value,similarity_boost:+document.getElementById('sim').value,style:+document.getElementById('sty').value,use_speaker_boost:true}
-      })
-    });
-    if(!res.ok){const e=await res.json();throw new Error(e.detail?.message||'생성 실패 ('+res.status+')');}
-    const blob=await res.blob(); lastBlob=blob;
-    const url=URL.createObjectURL(blob);
-    stop(); audio=new Audio(url); setP(100);
-    audio.play(); wave(true); setSt('재생 중','playing');
-    document.getElementById('stopBtn').disabled=false;
-    document.getElementById('dlBtn').disabled=false;
-    audio.onended=()=>{wave(false);setSt('완료');document.getElementById('stopBtn').disabled=true;setTimeout(()=>setP(0),1000);};
-  }catch(e){setSt('오류: '+e.message,'err');setP(0);}
-  finally{document.getElementById('playBtn').disabled=false;}
+  if(isPaused){synth.resume();isPaused=false;isPlaying=true;wave(true);setSt('재생 중','playing');updateBtns();return;}
+  synth.cancel();
+  utt=new SpeechSynthesisUtterance(txt);
+  if(sel){utt.voice=sel;utt.lang=sel.lang;}
+  utt.rate=parseFloat(document.getElementById('rate').value);
+  utt.pitch=parseFloat(document.getElementById('pitch').value);
+  utt.volume=parseFloat(document.getElementById('vol').value);
+  const total=txt.length;
+  utt.onboundary=e=>{if(e.name==='word')setP(Math.round(e.charIndex/total*100));};
+  utt.onstart=()=>{isPlaying=true;isPaused=false;wave(true);setSt('재생 중','playing');updateBtns();};
+  utt.onend=()=>{isPlaying=false;isPaused=false;wave(false);setSt('완료');setP(100);updateBtns();setTimeout(()=>setP(0),1200);};
+  utt.onerror=e=>{isPlaying=false;wave(false);setSt('오류: '+e.error);updateBtns();};
+  synth.speak(utt);
 }
-
-function stop(){if(audio){audio.pause();audio.currentTime=0;audio=null;}wave(false);setSt('대기 중');document.getElementById('stopBtn').disabled=true;}
-function dl(){if(!lastBlob)return;const url=URL.createObjectURL(lastBlob);const a=document.createElement('a');a.href=url;a.download='tts_elevenlabs.mp3';a.click();URL.revokeObjectURL(url);}
+function pause(){
+  if(synth.speaking&&!isPaused){synth.pause();isPaused=true;isPlaying=false;wave(false);setSt('일시정지');updateBtns();}
+  else if(isPaused) play();
+}
+function stop(){synth.cancel();isPlaying=false;isPaused=false;wave(false);setSt('대기 중');setP(0);updateBtns();if(recorder&&recorder.state!=='inactive')recorder.stop();}
+function updateBtns(){
+  document.getElementById('playBtn').disabled=isPlaying;
+  document.getElementById('pauseBtn').disabled=!isPlaying&&!isPaused;
+  document.getElementById('stopBtn').disabled=!isPlaying&&!isPaused;
+  document.getElementById('pauseBtn').textContent=isPaused?'▶ 계속':'⏸ 일시정지';
+}
+async function download(){
+  const txt=document.getElementById('txt').value.trim();
+  if(!txt){alert('텍스트를 입력해주세요.');return;}
+  try{
+    setSt('탭 오디오 공유 요청 중...','');
+    const stream=await navigator.mediaDevices.getDisplayMedia({video:false,audio:{echoCancellation:false,noiseSuppression:false}});
+    chunks=[]; recorder=new MediaRecorder(stream);
+    recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+    recorder.onstop=()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:'audio/webm'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='tts_output.webm';a.click();URL.revokeObjectURL(url);setSt('다운로드 완료!','playing');};
+    recorder.start(); setSt('녹음 중 — 재생 시작!','');
+    setTimeout(()=>play(),300);
+    utt.onend=()=>{isPlaying=false;isPaused=false;wave(false);updateBtns();setP(100);setTimeout(()=>{if(recorder&&recorder.state!=='inactive')recorder.stop();setP(0);},500);};
+  }catch(e){if(e.name==='NotAllowedError')setSt('취소됨');else setSt('오류');}
+}
 const wave=a=>['b1','b2','b3','b4','b5'].forEach(id=>{const el=document.getElementById(id);a?el.classList.add('on'):el.classList.remove('on');});
 const setSt=(m,c)=>{const el=document.getElementById('st');el.textContent=m;el.className='status'+(c?' '+c:'');};
 const setP=p=>document.getElementById('prog').style.width=p+'%';
