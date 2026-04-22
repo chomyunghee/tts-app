@@ -5,98 +5,315 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TTS 스튜디오</title>
 <style>
-body {font-family:sans-serif;padding:20px;background:#f5f5f5;}
-textarea{width:100%;height:120px;font-size:16px;margin-bottom:10px;}
-button{padding:10px;margin:5px;font-size:14px;cursor:pointer;}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f4; --bg3: #eeece9;
+    --text: #1a1a18; --text2: #6b6b67; --text3: #9b9b97;
+    --border: rgba(0,0,0,0.11); --border2: rgba(0,0,0,0.2);
+    --green: #166534; --green-bg: #dcfce7;
+    --red: #991b1b; --red-bg: #fee2e2;
+    --blue: #1e40af; --blue-bg: #dbeafe;
+    --amber: #92400e; --amber-bg: #fef3c7;
+    --r: 10px; --rs: 7px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --bg2: #262624; --bg3: #2e2e2c;
+      --text: #f0ede8; --text2: #a0a09a; --text3: #6a6a65;
+      --border: rgba(255,255,255,0.09); --border2: rgba(255,255,255,0.18);
+      --green: #86efac; --green-bg: #14532d33;
+      --red: #fca5a5; --red-bg: #7f1d1d33;
+      --blue: #93c5fd; --blue-bg: #1e3a5f33;
+      --amber: #fcd34d; --amber-bg: #78350f33;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 2rem 1rem 3rem; }
+  .app { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  header { text-align: center; }
+  header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+  header p { font-size: 13px; color: var(--text2); margin-top: 5px; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+  .tag-free { background: var(--green-bg); color: var(--green); }
+
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--r); padding: 1.1rem 1.25rem; }
+  .card-title { font-size: 10.5px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 12px; }
+
+  textarea { width: 100%; min-height: 130px; resize: vertical; font-size: 15px; line-height: 1.65; color: var(--text); background: transparent; border: none; outline: none; font-family: inherit; }
+  .char-count { font-size: 12px; color: var(--text3); text-align: right; margin-top: 4px; }
+
+  .voice-panel { display: flex; flex-direction: column; gap: 10px; }
+  .search-inp { width: 100%; padding: 8px 12px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text); font-size: 13px; outline: none; font-family: inherit; transition: border-color 0.15s; }
+  .search-inp:focus { border-color: var(--text); }
+
+  .ftabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ftab { display: flex; align-items: center; gap: 4px; padding: 5px 11px; border-radius: 99px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+  .ftab:hover { background: var(--bg2); }
+  .ftab.active { background: var(--text); color: var(--bg); border-color: transparent; }
+  .ftab:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .vlist { max-height: 250px; overflow-y: auto; border: 0.5px solid var(--border); border-radius: var(--rs); }
+  .vitem { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; border-bottom: 0.5px solid var(--border); transition: background 0.1s; }
+  .vitem:last-child { border-bottom: none; }
+  .vitem:hover { background: var(--bg2); }
+  .vitem.sel { background: var(--bg2); }
+  .vitem.sel .vname { font-weight: 600; }
+  .vavatar { width: 32px; height: 32px; border-radius: 50%; background: var(--bg2); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .vinfo { flex: 1; min-width: 0; }
+  .vname { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vmeta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+  .pill { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--bg2); border: 0.5px solid var(--border); color: var(--text2); }
+  .pill-local { background: var(--green-bg); border-color: transparent; color: var(--green); }
+  .pill-net { background: var(--blue-bg); border-color: transparent; color: var(--blue); }
+  .pill-fav { background: var(--amber-bg); border-color: transparent; color: var(--amber); }
+  .vstar { padding: 4px 7px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: transparent; cursor: pointer; font-size: 14px; flex-shrink: 0; transition: all 0.15s; }
+  .vstar:hover { background: var(--bg2); }
+  .vprev { padding: 4px 9px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-size: 11px; cursor: pointer; font-family: inherit; flex-shrink: 0; transition: all 0.15s; }
+  .vprev:hover { background: var(--bg2); color: var(--text); }
+  .vcount { font-size: 11px; color: var(--text3); text-align: right; }
+
+  .ctrl-col { display: flex; flex-direction: column; gap: 12px; }
+  .ctrl-row { display: flex; align-items: center; gap: 12px; }
+  .ctrl-row label { font-size: 13px; color: var(--text2); min-width: 40px; }
+  .ctrl-row input[type=range] { flex: 1; accent-color: var(--text); }
+  .ctrl-val { font-size: 13px; font-weight: 600; min-width: 40px; text-align: right; }
+
+  .btn-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border-radius: var(--rs); border: 0.5px solid var(--border2); background: transparent; color: var(--text); font-size: 13.5px; cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
+  .btn:hover { background: var(--bg2); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .btn-p { background: var(--text); color: var(--bg); border-color: transparent; font-weight: 600; }
+  .btn-p:hover { opacity: 0.88; background: var(--text); }
+  .btn-s { border-color: var(--red); color: var(--red); }
+  .btn-s:hover { background: var(--red-bg); }
+
+  .waveform { display: flex; align-items: center; gap: 3px; height: 32px; margin: 0 6px; }
+  .bar { width: 3px; border-radius: 2px; background: var(--text3); height: 4px; }
+  .bar.on { background: var(--text); animation: wv .85s ease-in-out infinite; }
+  @keyframes wv { 0%,100%{height:4px}50%{height:20px} }
+  .bar:nth-child(2).on{animation-delay:.13s}.bar:nth-child(3).on{animation-delay:.26s}.bar:nth-child(4).on{animation-delay:.09s}.bar:nth-child(5).on{animation-delay:.32s}
+
+  .status { font-size: 12px; color: var(--text3); margin-left: auto; }
+  .status.playing { color: var(--green); }
+  .prog-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .prog-fill { height: 100%; background: var(--text); width: 0%; border-radius: 2px; transition: width 0.3s; }
+  .dl-note { font-size: 11px; color: var(--text3); margin-top: 8px; line-height: 1.6; }
+  .empty { text-align: center; padding: 2.5rem; font-size: 13px; color: var(--text3); line-height: 1.7; }
+  footer { text-align: center; font-size: 12px; color: var(--text3); padding-top: 4px; }
 </style>
 </head>
 <body>
+<div class="app">
+  <header>
+    <h1>TTS 스튜디오 <span class="tag tag-free">완전 무료</span></h1>
+    <p>API 키 없이 바로 사용 · 다국어 지원 · 브라우저 내장 엔진</p>
+  </header>
 
-<h2>TTS 스튜디오 (감정 버전)</h2>
+  <div class="card">
+    <div class="card-title">텍스트 입력</div>
+    <textarea id="txt" placeholder="여기에 텍스트를 입력하세요..."></textarea>
+    <div class="char-count"><span id="charCt">0</span>자</div>
+  </div>
 
-<textarea id="txt" placeholder="텍스트 입력"></textarea>
+  <div class="card">
+    <div class="card-title">음성 선택</div>
+    <div class="voice-panel">
+      <input type="text" class="search-inp" id="vsearch" placeholder="이름·언어 검색..." oninput="filter()">
+      <div class="ftabs" id="ftabs"></div>
+      <div class="vlist" id="vlist"><div class="empty">음성 로딩 중...</div></div>
+      <div class="vcount" id="vcount"></div>
+    </div>
+  </div>
 
-<div>
-  <button onclick="setEmotion('normal')">기본</button>
-  <button onclick="setEmotion('sad')">😢 슬픔</button>
-  <button onclick="setEmotion('happy')">😊 밝음</button>
-  <button onclick="setEmotion('excited')">🔥 흥분</button>
-  <button onclick="setEmotion('serious')">😐 진지</button>
-</div>
+  <div class="card">
+    <div class="card-title">음성 설정</div>
+    <div class="ctrl-col">
+      <div class="ctrl-row"><label>속도</label><input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" oninput="v('rateV',parseFloat(this.value).toFixed(1)+'x')"><span class="ctrl-val" id="rateV">1.0x</span></div>
+      <div class="ctrl-row"><label>음조</label><input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1" oninput="v('pitchV',parseFloat(this.value).toFixed(1))"><span class="ctrl-val" id="pitchV">1.0</span></div>
+      <div class="ctrl-row"><label>음량</label><input type="range" id="vol" min="0" max="1" step="0.05" value="1" oninput="v('volV',Math.round(this.value*100)+'%')"><span class="ctrl-val" id="volV">100%</span></div>
+    </div>
+  </div>
 
-<div>
-  <button onclick="play()">▶ 재생</button>
-  <button onclick="stop()">■ 정지</button>
+  <div class="card">
+    <div class="card-title">재생 &amp; 다운로드</div>
+    <div class="btn-row">
+      <button class="btn btn-p" id="playBtn" onclick="play()">▶ 재생</button>
+      <button class="btn" id="pauseBtn" onclick="pause()" disabled>⏸ 일시정지</button>
+      <button class="btn btn-s" id="stopBtn" onclick="stop()" disabled>■ 정지</button>
+      <div class="waveform"><div class="bar" id="b1"></div><div class="bar" id="b2"></div><div class="bar" id="b3"></div><div class="bar" id="b4"></div><div class="bar" id="b5"></div></div>
+      <span class="status" id="st">대기 중</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
+    <div style="margin-top:10px;">
+      <button class="btn" onclick="download()">⬇ 음성 파일 다운로드</button>
+    </div>
+    <p class="dl-note">다운로드 클릭 후 탭 오디오 공유를 허용하면 WebM 파일로 저장됩니다.</p>
+  </div>
+
+  <footer>Web Speech API · 완전 무료 · 브라우저에서 직접 처리 · 외부 전송 없음</footer>
 </div>
 
 <script>
 const synth = window.speechSynthesis;
-let currentEmotion = 'normal';
+let all=[], filtered=[], sel=null, af='all';
+let isPlaying=false, isPaused=false, utt=null;
+let recorder=null, chunks=[];
+let favs=new Set(JSON.parse(localStorage.getItem('tts_favs')||'[]'));
+const saveFavs=()=>localStorage.setItem('tts_favs',JSON.stringify([...favs]));
+const v=(id,t)=>document.getElementById(id).textContent=t;
 
-function setEmotion(type){
-  currentEmotion = type;
-  alert("감정: " + type);
+const langLabels={ko:'한국어',en:'영어',ja:'일본어',zh:'중국어',fr:'프랑스어',de:'독일어',es:'스페인어',it:'이탈리아어',pt:'포르투갈어',ru:'러시아어',ar:'아랍어',hi:'힌디어',nl:'네덜란드어',pl:'폴란드어',sv:'스웨덴어',tr:'터키어',th:'태국어',id:'인도네시아어',vi:'베트남어'};
+const flagMap={'ko':'🇰🇷','en-US':'🇺🇸','en-GB':'🇬🇧','en-AU':'🇦🇺','en-IN':'🇮🇳','ja':'🇯🇵','zh':'🇨🇳','zh-TW':'🇹🇼','fr':'🇫🇷','de':'🇩🇪','es':'🇪🇸','it':'🇮🇹','pt-BR':'🇧🇷','pt-PT':'🇵🇹','ru':'🇷🇺','ar':'🇸🇦','hi':'🇮🇳','nl':'🇳🇱','sv':'🇸🇪','tr':'🇹🇷'};
+const samples={ko:'안녕하세요! 반갑습니다.',en:'Hello! Nice to meet you.',ja:'こんにちは！よろしくお願いします。',zh:'你好！很高兴认识你。',fr:'Bonjour ! Ravi de vous rencontrer.',de:'Hallo! Schön, Sie kennenzulernen.',es:'¡Hola! Encantado de conocerte.',it:'Ciao! Piacere di conoscerti.',pt:'Olá! Prazer em conhecê-lo.',ru:'Привет! Приятно познакомиться.'};
+
+const femaleNames=new Set(['samantha','victoria','karen','moira','fiona','ava','allison','susan','zira','helena','anna','alice','kyoko','joana','luciana','monica','paulina','veena','kanya','laura','amelie','katja','petra','tessa','nora','ellen','julie','sara','sora','yuna','heera','raveena','agnes','alva','ida','klara','eva','linh','lekha','milena','mariska','ting-ting','sin-ji','mei-jia']);
+const maleNames=new Set(['alex','daniel','fred','tom','david','mark','george','rishi','yuri','luca','diego','maged','tarik','thomas','oliver','arthur','eddy','reed','aaron','nathan','gordon','bruce','ralph','albert','jorge','felix','leon','henrik','oskar','adam']);
+
+function classify(vx){
+  const n=vx.name.toLowerCase(), l=vx.lang.toLowerCase(), c=n+' '+l;
+  if(['junior','child','kid'].some(k=>c.includes(k))) return 'child';
+  if(['senior','elder','grandma','grandpa','할머니','할아버지'].some(k=>c.includes(k))) return 'elderly';
+  if(['teen','youth'].some(k=>c.includes(k))) return 'youth';
+  const fn=n.split(/[\s\-_]/)[0];
+  if(femaleNames.has(fn)||['female','woman','girl','여성','여자','여','féminin','weiblich'].some(k=>c.includes(k))) return 'female';
+  if(maleNames.has(fn)||['male','man','boy','남성','남자','남','masculin','männlich'].some(k=>c.includes(k))) return 'male';
+  return 'unknown';
 }
 
-function speakSequenceAdvanced(text){
-  const sentences = text
-    .replace(/\n/g,' ')
-    .split(/([.!?…]|,)/)
-    .reduce((acc,cur,i,arr)=>{
-      if(i%2===0) acc.push(cur+(arr[i+1]||''));
-      return acc;
-    },[])
-    .map(s=>s.trim())
-    .filter(s=>s.length>0);
+const getFlag=l=>flagMap[l]||flagMap[l.split('-')[0]]||'🌐';
+const getLang=l=>langLabels[l.split('-')[0]]||l;
+const getSample=l=>samples[l.split('-')[0]]||'Hello! This is a voice preview.';
+const catIcon={female:'👩',male:'👨',child:'👧',elderly:'👴',youth:'🧑',unknown:'🎙'};
+const catLabel={fav:'즐겨찾기',all:'전체',female:'여자',male:'남자',youth:'청년',elderly:'노인',child:'어린이',unknown:'기타'};
+const catOrder=['fav','all','female','male','youth','elderly','child','unknown'];
 
-  let i=0;
+function populate(){
+  all=synth.getVoices();
+  if(!all.length) return;
+  all.forEach(vx=>vx._cat=classify(vx));
+  all.sort((a,b)=>{
+    if(a.lang.startsWith('ko')&&!b.lang.startsWith('ko')) return -1;
+    if(!a.lang.startsWith('ko')&&b.lang.startsWith('ko')) return 1;
+    return a.lang.localeCompare(b.lang);
+  });
+  if(!sel) sel=all.find(vx=>vx.lang.startsWith('ko'))||all[0];
+  buildTabs(); filter();
+}
+if(synth.onvoiceschanged!==undefined) synth.onvoiceschanged=populate;
+populate();
 
-  function next(){
-    if(i>=sentences.length) return;
+function buildTabs(){
+  const tabs=document.getElementById('ftabs'); tabs.innerHTML='';
+  const cnt={all:all.length,fav:favs.size};
+  all.forEach(vx=>{const c=vx._cat;cnt[c]=(cnt[c]||0)+1;});
+  catOrder.forEach(key=>{
+    const n=cnt[key]||0;
+    if(key!=='fav'&&key!=='all'&&n===0) return;
+    const btn=document.createElement('button');
+    btn.id='tab_'+key;
+    btn.className='ftab'+(key==='all'?' active':'');
+    const icon=key==='fav'?'⭐':key==='all'?'🎙':(catIcon[key]||'');
+    btn.innerHTML=icon+' '+catLabel[key]+(key!=='all'?' ('+n+')':'');
+    btn.onclick=()=>{af=key;document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');filter();};
+    tabs.appendChild(btn);
+  });
+}
 
-    const s = sentences[i];
-    const u = new SpeechSynthesisUtterance(s);
-
-    let rate=1, pitch=1;
-
-    if(currentEmotion==='sad'){
-      rate=0.8; pitch=0.85;
-    }else if(currentEmotion==='happy'){
-      rate=1.05; pitch=1.2;
-    }else if(currentEmotion==='excited'){
-      rate=1.15; pitch=1.25;
-    }else if(currentEmotion==='serious'){
-      rate=0.9; pitch=0.95;
-    }
-
-    if(s.includes('!')){ rate+=0.05; pitch+=0.1; }
-    if(s.includes('?')){ pitch+=0.1; }
-    if(s.includes('...')||s.includes('…')){ rate-=0.1; }
-
-    u.rate = rate;
-    u.pitch = pitch;
-    u.lang = "ko-KR";
-
-    u.onend = ()=>{ i++; next(); };
-
-    synth.speak(u);
+function filter(){
+  const q=document.getElementById('vsearch').value.toLowerCase();
+  filtered=all.filter(vx=>{
+    const mc=af==='fav'?favs.has(vx.name):af==='all'?true:vx._cat===af;
+    const srch=[vx.name,vx.lang,getLang(vx.lang)].join(' ').toLowerCase();
+    return mc&&(!q||srch.includes(q));
+  });
+  if(af==='all'||af==='female'||af==='male'){
+    filtered.sort((a,b)=>(favs.has(b.name)?1:0)-(favs.has(a.name)?1:0));
   }
-
-  next();
+  renderList();
 }
+
+function renderList(){
+  const list=document.getElementById('vlist');
+  document.getElementById('vcount').textContent=filtered.length+'개 음성';
+  if(!filtered.length){list.innerHTML='<div class="empty">음성이 없어요<br><small>Windows 설정 → 시간 및 언어 → 음성에서 추가하세요</small></div>';return;}
+  list.innerHTML='';
+  filtered.forEach((vx,i)=>{
+    const isFav=favs.has(vx.name);
+    const item=document.createElement('div');
+    item.className='vitem'+(sel&&sel.name===vx.name?' sel':'');
+    item.innerHTML=`<div class="vavatar">${getFlag(vx.lang)}</div><div class="vinfo"><div class="vname">${vx.name}${isFav?' ⭐':''}</div><div class="vmeta"><span class="pill ${vx.localService?'pill-local':'pill-net'}">${vx.localService?'오프라인':'온라인'}</span><span class="pill">${getLang(vx.lang)}</span></div></div><button class="vstar" onclick="toggleFav(event,'${vx.name}')">${isFav?'⭐':'☆'}</button><button class="vprev" onclick="prev(event,${i})">미리듣기</button>`;
+    item.addEventListener('click',e=>{if(['vstar','vprev'].some(c=>e.target.classList.contains(c)))return;sel=vx;document.querySelectorAll('.vitem').forEach(x=>x.classList.remove('sel'));item.classList.add('sel');});
+    list.appendChild(item);
+  });
+}
+
+function toggleFav(e,name){
+  e.stopPropagation();
+  favs.has(name)?favs.delete(name):favs.add(name);
+  saveFavs();
+  const ft=document.getElementById('tab_fav');
+  if(ft) ft.innerHTML='⭐ 즐겨찾기 ('+favs.size+')';
+  filter();
+}
+
+function prev(e,i){
+  e.stopPropagation();
+  const vx=filtered[i];
+  synth.cancel(); isPlaying=false; isPaused=false; wave(false); updateBtns();
+  const u=new SpeechSynthesisUtterance(getSample(vx.lang));
+  u.voice=vx; u.rate=1; u.pitch=1; u.volume=1; synth.speak(u);
+  sel=vx;
+  document.querySelectorAll('.vitem').forEach(x=>x.classList.remove('sel'));
+  e.target.closest('.vitem').classList.add('sel');
+}
+
+document.getElementById('txt').addEventListener('input',function(){v('charCt',this.value.length);});
 
 function play(){
-  const txt = document.getElementById("txt").value.trim();
-  if(!txt){ alert("텍스트 입력하세요"); return; }
-
+  const txt=document.getElementById('txt').value.trim();
+  if(!txt){alert('텍스트를 입력해주세요.');return;}
+  if(isPaused){synth.resume();isPaused=false;isPlaying=true;wave(true);setSt('재생 중','playing');updateBtns();return;}
   synth.cancel();
-  speakSequenceAdvanced(txt);
+  utt=new SpeechSynthesisUtterance(txt);
+  if(sel){utt.voice=sel;utt.lang=sel.lang;}
+  utt.rate=parseFloat(document.getElementById('rate').value);
+  utt.pitch=parseFloat(document.getElementById('pitch').value);
+  utt.volume=parseFloat(document.getElementById('vol').value);
+  const total=txt.length;
+  utt.onboundary=e=>{if(e.name==='word')setP(Math.round(e.charIndex/total*100));};
+  utt.onstart=()=>{isPlaying=true;isPaused=false;wave(true);setSt('재생 중','playing');updateBtns();};
+  utt.onend=()=>{isPlaying=false;isPaused=false;wave(false);setSt('완료');setP(100);updateBtns();setTimeout(()=>setP(0),1200);};
+  utt.onerror=e=>{isPlaying=false;wave(false);setSt('오류: '+e.error);updateBtns();};
+  synth.speak(utt);
 }
-
-function stop(){
-  synth.cancel();
+function pause(){
+  if(synth.speaking&&!isPaused){synth.pause();isPaused=true;isPlaying=false;wave(false);setSt('일시정지');updateBtns();}
+  else if(isPaused) play();
 }
+function stop(){synth.cancel();isPlaying=false;isPaused=false;wave(false);setSt('대기 중');setP(0);updateBtns();if(recorder&&recorder.state!=='inactive')recorder.stop();}
+function updateBtns(){
+  document.getElementById('playBtn').disabled=isPlaying;
+  document.getElementById('pauseBtn').disabled=!isPlaying&&!isPaused;
+  document.getElementById('stopBtn').disabled=!isPlaying&&!isPaused;
+  document.getElementById('pauseBtn').textContent=isPaused?'▶ 계속':'⏸ 일시정지';
+}
+async function download(){
+  const txt=document.getElementById('txt').value.trim();
+  if(!txt){alert('텍스트를 입력해주세요.');return;}
+  try{
+    setSt('탭 오디오 공유 요청 중...','');
+    const stream=await navigator.mediaDevices.getDisplayMedia({video:false,audio:{echoCancellation:false,noiseSuppression:false}});
+    chunks=[]; recorder=new MediaRecorder(stream);
+    recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+    recorder.onstop=()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:'audio/webm'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='tts_output.webm';a.click();URL.revokeObjectURL(url);setSt('다운로드 완료!','playing');};
+    recorder.start(); setSt('녹음 중 — 재생 시작!','');
+    setTimeout(()=>play(),300);
+    utt.onend=()=>{isPlaying=false;isPaused=false;wave(false);updateBtns();setP(100);setTimeout(()=>{if(recorder&&recorder.state!=='inactive')recorder.stop();setP(0);},500);};
+  }catch(e){if(e.name==='NotAllowedError')setSt('취소됨');else setSt('오류');}
+}
+const wave=a=>['b1','b2','b3','b4','b5'].forEach(id=>{const el=document.getElementById(id);a?el.classList.add('on'):el.classList.remove('on');});
+const setSt=(m,c)=>{const el=document.getElementById('st');el.textContent=m;el.className='status'+(c?' '+c:'');};
+const setP=p=>document.getElementById('prog').style.width=p+'%';
 </script>
-
 </body>
 </html>
